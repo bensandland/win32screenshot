@@ -18,6 +18,9 @@ module Win32
         # @example Take a screenshot of the window with the specified handle
         #   Win32::Screenshot::Take.of(:window, :hwnd => 123456)
         #
+        # @example Take a screenshot of the specified window's top-left corner's area
+        #   Win32::Screenshot::Take.of(:window, :title => /internet/i, :area => [10, 10, 20, 20])
+        #
         # @example Take a screenshot of the window's client area (e.g. without title bar) with the specified handle
         #   Win32::Screenshot::Take.of(:window, :hwnd => 123456, :context => :client)
         #

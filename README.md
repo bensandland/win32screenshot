@@ -30,6 +30,9 @@ Win32::Screenshot::Take.of(:foreground).write("image.png")
 # Take a screenshot of the foreground window, and writing over previous image if it exists
 Win32::Screenshot::Take.of(:foreground).write!("image.png")
 
+# Take a screenshot of the specified window's top-left corner's area
+Win32::Screenshot::Take.of(:window, title: /internet/i, area: [10, 10, 20, 20]).write("image.jpg")
+
 # Take a screenshot of the specified window with title matching the regular expression
 Win32::Screenshot::Take.of(:window, title: /internet/i).write("image.jpg")
 
