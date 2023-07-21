@@ -50,16 +50,21 @@ module Win32
         SM_CXVIRTUALSCREEN = 78
         SM_CYVIRTUALSCREEN = 79
 
-        def capture_window(hwnd)
+        def capture_window(hwnd, **opts)
           width, height = dimensions_for(hwnd)
 
           hScreenDC, hmemDC, hmemBM = prepare_object(hwnd, width, height)
           print_window(hwnd, hmemDC, PW_RENDERFULLCONTENT)
+          _left, _top, width, height = calculate_area(*opts[:area]) if opts[:area]
           create_bitmap(hScreenDC, hmemDC, hmemBM, width, height)
         end
 
-        def capture_screen(hwnd)
-          left, top, width, height = desktop.dimensions
+        def capture_screen(hwnd, **opts)
+          if opts[:area]
+            left, top, width, height = calculate_area(*opts[:area])
+          else
+            left, top, width, height = desktop.dimensions
+          end
 
           hScreenDC, hmemDC, hmemBM = prepare_object(hwnd, width, height)
           bit_blt(hmemDC, 0, 0, width, height, hScreenDC, left, top, SRCCOPY)
@@ -84,11 +89,11 @@ module Win32
           di_bits(hmemDC, hmemBM, 0, height, lpvpxldata, bmInfo, DIB_RGB_COLORS)
 
           bmFileHeader = [
-                  19778,
-                  bitmap_size + 40 + 14,
-                  0,
-                  0,
-                  54
+            19778,
+            bitmap_size + 40 + 14,
+            0,
+            0,
+            54
           ].pack('SLSSL')
 
           Image.new(bmFileHeader + bmInfo + lpvpxldata.read_string(bitmap_size), width, height)
@@ -101,10 +106,10 @@ module Win32
 
         def desktop
           Win32::Screenshot::Desktop.new(
-               get_system_metrics(SM_XVIRTUALSCREEN),
-               get_system_metrics(SM_YVIRTUALSCREEN),
-               get_system_metrics(SM_CXVIRTUALSCREEN),
-               get_system_metrics(SM_CYVIRTUALSCREEN)
+            get_system_metrics(SM_XVIRTUALSCREEN),
+            get_system_metrics(SM_YVIRTUALSCREEN),
+            get_system_metrics(SM_CXVIRTUALSCREEN),
+            get_system_metrics(SM_CYVIRTUALSCREEN)
           )
         end
 
@@ -114,6 +119,10 @@ module Win32
           left, top, width, height = rect.unpack('l4')
 
           [width - left, height - top]
+        end
+
+        def calculate_area(x1, y1, x2, y2)
+          [x1, y1, x2-x1, y2-y1]
         end
       end
     end
